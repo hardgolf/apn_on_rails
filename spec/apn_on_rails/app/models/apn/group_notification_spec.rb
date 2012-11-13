@@ -8,7 +8,7 @@ describe APN::GroupNotification do
   
   describe 'alert' do
     
-    it 'should trim the message to 108 characters' do
+    it 'should trim the message to 150 characters' do
       noty = APN::GroupNotification.new
       noty.alert = 'a' * 200
       noty.alert.should == ('a' * 105) + '...'

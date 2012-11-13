@@ -17,11 +17,11 @@ class APN::GroupNotification < APN::Base
   
   # Stores the text alert message you want to send to the device.
   # 
-  # If the message is over 108 characters long it will get truncated
-  # to 108 characters with a <tt>...</tt>
+  # If the message is over 150 characters long it will get truncated
+  # to 150 characters with a <tt>...</tt>
   def alert=(message)
-    if !message.blank? && message.size > 108
-      message = truncate(message, :length => 108)
+    if !message.blank? && message.size > 150
+      message = truncate(message, :length => 150)
     end
     write_attribute('alert', message)
   end
@@ -45,8 +45,8 @@ class APN::GroupNotification < APN::Base
     result = {}
     result['aps'] = {}
     if self.alert
-      result['aps']['alert'] = if self.alert.size > 108 && configatron.apn.auto_truncate
-                                 truncate(self.alert, :length => 108)
+      result['aps']['alert'] = if self.alert.size > 150 && configatron.apn.auto_truncate
+                                 truncate(self.alert, :length => 150)
                                else
                                  self.alert
                                end
