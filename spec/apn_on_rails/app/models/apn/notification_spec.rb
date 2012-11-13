@@ -1,13 +1,17 @@
 require File.join(File.dirname(__FILE__), '..', '..', '..', '..', 'spec_helper.rb')
 
 describe APN::Notification do
+
+  after do
+    configatron.apn.auto_truncate = false
+  end
   
   describe 'alert' do
     
-    it 'should trim the message to 150 characters' do
+    it 'should trim the message to 108 characters' do
       noty = APN::Notification.new
       noty.alert = 'a' * 200
-      noty.alert.should == ('a' * 147) + '...'
+      noty.alert.should == ('a' * 105) + '...'
     end
     
   end
@@ -61,6 +65,16 @@ describe APN::Notification do
       }.should raise_error(APN::Errors::ExceededMessageSizeError)
     end
     
+    
+    it 'should not raise an expection if the message is too big if auto_truncate is enabled' do
+      configatron.apn.auto_truncate = true
+      device = DeviceFactory.create
+      noty = APN::Notification.create(:device => device, :sound => true, :badge => nil)
+      noty.send(:write_attribute, 'alert', 'a' * 183)
+      lambda {
+        noty.message_for_sending
+      }.should_not raise_error
+    end
   end
   
   describe 'send_notifications' do 

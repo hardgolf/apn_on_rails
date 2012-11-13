@@ -24,11 +24,11 @@ class APN::Notification < APN::Base
   
   # Stores the text alert message you want to send to the device.
   # 
-  # If the message is over 150 characters long it will get truncated
-  # to 150 characters with a <tt>...</tt>
+  # If the message is over 108 characters long it will get truncated
+  # to 108 characters with a <tt>...</tt>
   def alert=(message)
-    if !message.blank? && message.size > 150
-      message = truncate(message, :length => 150)
+    if !message.blank? && message.size > 108
+      message = truncate(message, :length => 108)
     end
     write_attribute('alert', message)
   end
@@ -51,7 +51,13 @@ class APN::Notification < APN::Base
   def apple_hash
     result = {}
     result['aps'] = {}
-    result['aps']['alert'] = self.alert if self.alert
+    if self.alert
+      result['aps']['alert'] = if self.alert.size > 108 && configatron.apn.auto_truncate
+                                 truncate(self.alert, :length => 108)
+                               else
+                                 self.alert
+                               end
+    end
     result['aps']['badge'] = self.badge.to_i if self.badge
     if self.sound
       result['aps']['sound'] = self.sound if self.sound.is_a? String
