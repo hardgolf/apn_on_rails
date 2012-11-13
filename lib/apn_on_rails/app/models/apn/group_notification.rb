@@ -6,6 +6,8 @@ class APN::GroupNotification < APN::Base
   belongs_to :group, :class_name => 'APN::Group'
   has_one    :app, :class_name => 'APN::App', :through => :group
   has_many   :device_groupings, :through => :group
+
+  scope :unsent, :conditions => {:sent_at => nil}
   
   validates_presence_of :group_id
   
