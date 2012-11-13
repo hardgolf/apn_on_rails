@@ -22,7 +22,9 @@ class APN::Notification < APN::Base
   belongs_to :device, :class_name => 'APN::Device'
   has_one    :app,    :class_name => 'APN::App', :through => :device
 
-  scope :unsent, :conditions => {:sent_at => nil}
+  def self.unsent
+    self.find(:all, :conditions => {:sent_at => nil})
+  end
 
   # Stores the text alert message you want to send to the device.
   # 
