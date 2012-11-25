@@ -89,14 +89,18 @@ class APN::Notification < APN::Base
   
   # Creates the binary message needed to send to Apple.
   def message_for_sending
-    json = self.to_apple_json
-    message = "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    message = generate_message
     if message.size.to_i > 256
       self.alert = self.alert[0,80] + "..."
     end
-    message = "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    message = generate_message
     raise APN::Errors::ExceededMessageSizeError.new(message) if message.size.to_i > 256
     message
+  end
+
+  def generate_message
+    json = self.to_apple_json
+    "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
   end
   
   def self.send_notifications

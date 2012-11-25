@@ -45,9 +45,14 @@ class APN::App < APN::Base
           next if noty.device.nil?
           next unless noty.device.app == app
 
-          conn.write(noty.message_for_sending)
-          noty.sent_at = Time.now
-          noty.save
+          begin
+            conn.write(noty.message_for_sending)
+            noty.sent_at = Time.now
+            noty.save
+          rescue APN::Errors::ExceededMessageSizeError => e
+            warn "Message is too big. Tried automatically shrinking it, but it wasn't enough. Skipping."
+            warn e.message
+          end
         end
       end
     rescue Exception => e
