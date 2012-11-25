@@ -56,7 +56,7 @@ class APN::Notification < APN::Base
     result = {}
     result['aps'] = {}
     if self.alert
-      result['aps']['alert'] = if self.alert.size > 130 && configatron.apn.auto_truncate
+      result['aps']['alert'] = if self.alert.size > 130
                                  truncate(self.alert, :length => 130)
                                else
                                  self.alert
@@ -74,7 +74,7 @@ class APN::Notification < APN::Base
     end
     result
   end
-  
+ 
   # Creates the JSON string required for an APN message.
   # 
   # Example:
@@ -90,6 +90,10 @@ class APN::Notification < APN::Base
   # Creates the binary message needed to send to Apple.
   def message_for_sending
     json = self.to_apple_json
+    message = "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    if message.size.to_i > 256
+      self.alert = self.alert[0,80] + "..."
+    end
     message = "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
     raise APN::Errors::ExceededMessageSizeError.new(message) if message.size.to_i > 256
     message
