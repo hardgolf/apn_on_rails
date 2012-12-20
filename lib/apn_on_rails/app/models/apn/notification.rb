@@ -100,7 +100,11 @@ class APN::Notification < APN::Base
 
   def generate_message
     json = self.to_apple_json
-    "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    begin
+      "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    rescue RangeError
+      self.destroy
+    end
   end
   
   def self.send_notifications
