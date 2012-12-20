@@ -84,6 +84,9 @@ class APN::Notification < APN::Base
   #   apn.alert = 'Hello!'
   #   apn.to_apple_json # => '{"aps":{"badge":5,"sound":"my_sound.aiff","alert":"Hello!"}}'
   def to_apple_json(truncate_at = 130)
+    if truncate_at <= 80
+      raise APN::Errors::TruncationFailure.new(self.id, self.alert)
+    end
     json = self.apple_hash(truncate_at).to_json
     json = self.to_apple_json(truncate_at - 10) if json.length > 256
     json

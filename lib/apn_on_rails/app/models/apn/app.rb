@@ -49,6 +49,11 @@ class APN::App < APN::Base
             conn.write(noty.message_for_sending)
             noty.sent_at = Time.now
             noty.save
+          rescue APN::Errors::TruncationFailure => e
+            warn "Failed to truncate message"
+            warn e.message
+            noty.destroy
+            warn "removed message from queue"
           rescue APN::Errors::ExceededMessageSizeError => e
             warn "Message is too big. Tried automatically shrinking it, but it wasn't enough. Skipping."
             warn e.message

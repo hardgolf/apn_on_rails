@@ -53,6 +53,12 @@ module APN # :nodoc:
       end
     end
 
+    class TruncationFailure < StandardError
+      def initialize(id, alert)
+        super("Could not truncate notification #{id}. Alert: #{alert}")
+      end
+    end
+
   end # Errors
 
 end # APN
