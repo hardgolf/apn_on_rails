@@ -30,9 +30,9 @@ class APN::Notification < APN::Base
   # 
   # If the message is over 130 characters long it will get truncated
   # to 130 characters with a <tt>...</tt>
-  def alert=(message)
-    if !message.blank? && message.size > 130
-      message = truncate(message, :length => 130)
+  def alert=(message, truncate_at = 130)
+    if !message.blank? && message.size > truncate_at
+      message = truncate(message, :length => truncate_at)
     end
     write_attribute('alert', message)
   end
@@ -52,12 +52,12 @@ class APN::Notification < APN::Base
   #   apn.sound = true
   #   apn.custom_properties = {"typ" => 1}
   #   apn.apple_hash # => {"aps" => {"badge" => 0, "sound" => "1.aiff"}, "typ" => "1"}
-  def apple_hash
+  def apple_hash(truncate_at = 130)
     result = {}
     result['aps'] = {}
     if self.alert
-      result['aps']['alert'] = if self.alert.size > 130
-                                 truncate(self.alert, :length => 130)
+      result['aps']['alert'] = if self.alert.size > truncate_at
+                                 truncate(self.alert, :length => truncate_at)
                                else
                                  self.alert
                                end
@@ -83,8 +83,10 @@ class APN::Notification < APN::Base
   #   apn.sound = 'my_sound.aiff'
   #   apn.alert = 'Hello!'
   #   apn.to_apple_json # => '{"aps":{"badge":5,"sound":"my_sound.aiff","alert":"Hello!"}}'
-  def to_apple_json
-    self.apple_hash.to_json
+  def to_apple_json(truncate_at = 130)
+    json = self.apple_hash(truncate_at).to_json
+    json = self.to_apple_json(truncate_at - 10) if json.length > 256
+    json
   end
   
   # Creates the binary message needed to send to Apple.
@@ -100,11 +102,7 @@ class APN::Notification < APN::Base
 
   def generate_message
     json = self.to_apple_json
-    begin
-      "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
-    rescue RangeError
-      self.destroy
-    end
+    "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
   end
   
   def self.send_notifications
