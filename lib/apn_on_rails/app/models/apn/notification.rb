@@ -105,7 +105,8 @@ class APN::Notification < APN::Base
 
   def generate_message
     json = self.to_apple_json
-    "\0\0 #{self.device.to_hexa}\0#{json.length.chr}#{json}"
+    length = [json.length, 255].min
+    "\0\0 #{self.device.to_hexa}\0#{length.chr}#{json}"
   end
   
   def self.send_notifications
