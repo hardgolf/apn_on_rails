@@ -1,6 +1,6 @@
-# Represents the message you wish to send. 
+# Represents the message you wish to send.
 # An APN::Notification belongs to an APN::Device.
-# 
+#
 # Example:
 #   apn = APN::Notification.new
 #   apn.badge = 5
@@ -8,17 +8,17 @@
 #   apn.alert = 'Hello!'
 #   apn.device = APN::Device.find(1)
 #   apn.save
-# 
+#
 # To deliver call the following method:
 #   APN::Notification.send_notifications
-# 
+#
 # As each APN::Notification is sent the <tt>sent_at</tt> column will be timestamped,
 # so as to not be sent again.
 class APN::Notification < APN::Base
   include ::ActionView::Helpers::TextHelper
   extend ::ActionView::Helpers::TextHelper
   serialize :custom_properties
-  
+
   belongs_to :device, :class_name => 'APN::Device'
   has_one    :app,    :class_name => 'APN::App', :through => :device
 
@@ -26,8 +26,12 @@ class APN::Notification < APN::Base
     self.find(:all, :conditions => {:sent_at => nil})
   end
 
+  def self.unsent_ids
+    self.find(:all, :conditions => {:sent_at => nil}, :select => :id).map(&:id)
+  end
+
   # Stores the text alert message you want to send to the device.
-  # 
+  #
   # If the message is over 130 characters long it will get truncated
   # to 130 characters with a <tt>...</tt>
   def alert=(message, truncate_at = 130)
@@ -36,9 +40,9 @@ class APN::Notification < APN::Base
     end
     write_attribute('alert', message)
   end
-  
+
   # Creates a Hash that will be the payload of an APN.
-  # 
+  #
   # Example:
   #   apn = APN::Notification.new
   #   apn.badge = 5
@@ -46,7 +50,7 @@ class APN::Notification < APN::Base
   #   apn.alert = 'Hello!'
   #   apn.apple_hash # => {"aps" => {"badge" => 5, "sound" => "my_sound.aiff", "alert" => "Hello!"}}
   #
-  # Example 2: 
+  # Example 2:
   #   apn = APN::Notification.new
   #   apn.badge = 0
   #   apn.sound = true
@@ -74,9 +78,9 @@ class APN::Notification < APN::Base
     end
     result
   end
- 
+
   # Creates the JSON string required for an APN message.
-  # 
+  #
   # Example:
   #   apn = APN::Notification.new
   #   apn.badge = 5
@@ -91,7 +95,7 @@ class APN::Notification < APN::Base
     json = self.to_apple_json(truncate_at - 10) if json.length > 256
     json
   end
-  
+
   # Creates the binary message needed to send to Apple.
   def message_for_sending
     message = generate_message
@@ -108,10 +112,10 @@ class APN::Notification < APN::Base
     length = [json.length, 255].min
     "\0\0 #{self.device.to_hexa}\0#{length.chr}#{json}"
   end
-  
+
   def self.send_notifications
     ActiveSupport::Deprecation.warn("The method APN::Notification.send_notifications is deprecated.  Use APN::App.send_notifications instead.")
     APN::App.send_notifications
   end
-  
+
 end # APN::Notification
