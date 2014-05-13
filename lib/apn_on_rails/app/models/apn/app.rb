@@ -41,22 +41,24 @@ class APN::App < APN::Base
     app = APN::App.find_by_id(app_id)
     begin
       APN::Connection.open_for_delivery({:cert => the_cert}) do |conn, sock|
-        APN::Notification.unsent.each do |noty|
-          next if noty.device.nil?
-          next unless noty.device.app == app
+        APN::Notification.unsent_ids.each_slice(1000) do |ids|
+          APN::Notification.find(:all, :conditions => {:id => ids}).each do |noty|
+            next if noty.device.nil?
+            next unless noty.device.app == app
 
-          begin
-            conn.write(noty.message_for_sending)
-            noty.sent_at = Time.now
-            noty.save
-          rescue APN::Errors::TruncationFailure => e
-            warn "Failed to truncate message"
-            warn e.message
-            noty.destroy
-            warn "removed message from queue"
-          rescue APN::Errors::ExceededMessageSizeError => e
-            warn "Message is too big. Tried automatically shrinking it, but it wasn't enough. Skipping."
-            warn e.message
+            begin
+              conn.write(noty.message_for_sending)
+              noty.sent_at = Time.now
+              noty.save
+            rescue APN::Errors::TruncationFailure => e
+              warn "Failed to truncate message"
+              warn e.message
+              noty.destroy
+              warn "removed message from queue"
+            rescue APN::Errors::ExceededMessageSizeError => e
+              warn "Message is too big. Tried automatically shrinking it, but it wasn't enough. Skipping."
+              warn e.message
+            end
           end
         end
       end
