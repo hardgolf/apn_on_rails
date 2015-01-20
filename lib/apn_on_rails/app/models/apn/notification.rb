@@ -92,18 +92,18 @@ class APN::Notification < APN::Base
       raise APN::Errors::TruncationFailure.new(self.id, self.alert)
     end
     json = self.apple_hash(truncate_at).to_json
-    json = self.to_apple_json(truncate_at - 10) if json.length > 256
+    json = self.to_apple_json(truncate_at - 10) if json.length > 2048
     json
   end
 
   # Creates the binary message needed to send to Apple.
   def message_for_sending
     message = generate_message
-    if message.size.to_i > 256
+    if message.size.to_i > 2048
       self.alert = self.alert[0,80] + "..."
     end
     message = generate_message
-    raise APN::Errors::ExceededMessageSizeError.new(message) if message.size.to_i > 256
+    raise APN::Errors::ExceededMessageSizeError.new(message) if message.size.to_i > 2048
     message
   end
 
