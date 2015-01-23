@@ -1,3 +1,3 @@
 module ApnOnRails
-  VERSION = "0.5.1" unless defined?(ApnOnRails::VERSION)
+  VERSION = "0.5.2" unless defined?(ApnOnRails::VERSION)
 end

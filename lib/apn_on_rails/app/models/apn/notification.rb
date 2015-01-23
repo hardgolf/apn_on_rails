@@ -23,7 +23,7 @@ class APN::Notification < APN::Base
   has_one    :app,    :class_name => 'APN::App', :through => :device
 
   def self.unsent
-    self.find(:all, :conditions => {:sent_at => nil})
+    self.find(:all, :conditions => {:sent_at => nil}, :joins => :device)
   end
 
   def self.unsent_ids

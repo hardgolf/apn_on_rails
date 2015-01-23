@@ -16,3 +16,4 @@ spec/active_record/test.db
 .bundle
 **/.svn
 .rbenv-version
+.ruby-version
