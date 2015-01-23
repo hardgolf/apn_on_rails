@@ -6,6 +6,16 @@ describe APN::Notification do
     configatron.apn.auto_truncate = false
   end
 
+  describe ".unsent" do
+    it "does not return notifications without a device" do
+      noty = APN::Notification.create(
+        :device_id => 0, :sound => true, :badge => nil
+      )
+      APN::Notification.unsent.should_not include(noty.id)
+      noty.destroy
+    end
+  end
+
   describe ".unsent_ids" do
     it "returns an array of unsent ids" do
       configatron.apn.auto_truncate = true
