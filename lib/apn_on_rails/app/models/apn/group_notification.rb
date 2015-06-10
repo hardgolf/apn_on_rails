@@ -11,9 +11,9 @@ class APN::GroupNotification < APN::Base
 
   validates_presence_of :group_id
 
-  def devices
-    self.group.devices
-  end
+  #def devices
+  #  self.group.devices
+  #end
 
   # Stores the text alert message you want to send to the device.
   #
